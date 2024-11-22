@@ -1,0 +1,41 @@
+
+  .bi-facebook {
+    color: #fff;
+    font-size: 22px;  /* Facebook blue */
+  }
+  
+  .bi-twitter-x {
+    color: #1DA1F2;
+    font-size: 22px;  /* Twitter blue */
+  }
+  
+  .bi-instagram {
+    font-size: 22px;  /* Instagram pink */
+    background: linear-gradient(to bottom right, #E1306C, #e4dde1, #fa573a, #901717);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    transition: background-position 0.5s ease-in-out;
+    background-size: 200%;
+    background-position: top left;  /* Instagram pink */
+  }
+  
+  .bi-facebook:hover {
+    color: #000;
+    transition: ease-in-out;
+    font-size: 22px;  /* Facebook blue */
+  }
+
+  .bi-twitter-x:hover {
+    color: #000;
+    font-size: 22px;  /* Twitter blue */
+  }
+  
+  .bi-instagram:hover {
+    background-position: bottom right;  
+    background-clip: text;
+    background: linear-gradient(to bottom right, #fc3c7c, #0b090b, #ec310b, #e51e1e);
+    -webkit-background-clip: text;
+  }
+  
+  

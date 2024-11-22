@@ -1,0 +1,111 @@
+/* Post Content */
+
+.post-content {
+    padding-left: 10%;
+    padding-right: 10%;
+  }
+  
+  @media (max-width: 768px) {
+    .post-content {
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+  }
+  
+  .post-content .firstcharacter {
+    float: left;
+    font-family: Georgia;
+    font-size: 75px;
+    line-height: 60px;
+    padding-top: 4px;
+    padding-right: 8px;
+    padding-left: 3px;
+  }
+  
+  .post-content figure {
+    position: relative;
+    left: 52%;
+    min-width: 990px;
+    transform: translateX(-50%);
+  }
+  
+  @media (max-width: 1255px) {
+    .post-content figure {
+      min-width: auto;
+      left: auto !important;
+      transform: none;
+    }
+  }
+  
+  .post-content figure figcaption {
+    font-family: var(--font-secondary);
+    font-size: 14px;
+    padding: 10px 0 0 0;
+  }
+  
+  /* custom tab nav on sidebar */
+  .aside-block {
+    margin-bottom: 30px;
+  }
+  
+  .aside-block .custom-tab-nav .nav-item {
+    display: inline-block;
+  }
+  
+  .aside-block .custom-tab-nav .nav-item button {
+    color: var(--color-black);
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    border-radius: 0;
+    padding-left: 0;
+    padding-right: 0;
+    margin-right: 20px;
+  }
+  
+  .aside-block .custom-tab-nav .nav-item button.active {
+    background-color: var(--color-black) !important;
+    background-color: transparent !important;
+    color: var(--color-black);
+    border-bottom: 2px solid var(--color-black);
+  }
+  
+  .link-video {
+    position: relative;
+  }
+  
+  .link-video span {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    border-radius: 50%;
+    text-align: center;
+    display: inline-block;
+    background-color: rgba(var(--color-black-rgb), 0.2);
+    color: var(--color-white);
+  }
+  
+  .aside-links li {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(var(--color-black-rgb), 0.1);
+  }
+  
+  .aside-links li a {
+    display: block;
+    color: rgba(var(--color-black-rgb), 0.7);
+  }
+  
+  .aside-links li a:hover,
+  .aside-links li a:focus {
+    color: rgba(var(--color-black-rgb), 1);
+  }
+  
+  .aside-tags li {
+    display: inline-block;
+  }
