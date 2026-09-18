@@ -1,15 +1,23 @@
 import mongoose from "mongoose";
 
+// Cache the connection on globalThis so dev hot reloads reuse it.
+const globalCache = globalThis as unknown as {
+  mongooseConn?: Promise<typeof mongoose>;
+};
+
 const dbConnect = async () => {
+  if (!process.env.MONGO_URL) {
+    throw new Error("MONGO_URL is not set");
+  }
+  if (!globalCache.mongooseConn) {
+    globalCache.mongooseConn = mongoose.connect(process.env.MONGO_URL, { serverSelectionTimeoutMS: 4000 });
+  }
   try {
-    await mongoose.connect(process.env.MONGO_URL!, {
-        // 45 seconds socket timeout
-    });
-    console.log("You're all good buddy!");
+    return await globalCache.mongooseConn;
   } catch (error) {
-    console.error("I am a broken piece of machinery. When the machine is broken… I am ready.");
-    console.error("Error details:", error); // Log the actual error for more clarity
-    process.exit(1);  // Exit the process in case of failure
+    globalCache.mongooseConn = undefined;
+    console.error("Mongo connection failed:", error);
+    throw error;
   }
 };
 
