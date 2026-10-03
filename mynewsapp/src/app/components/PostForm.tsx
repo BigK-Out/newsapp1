@@ -82,7 +82,7 @@ export default function PostForm({ post }: { post?: Post }) {
 
         <div className="field wide">
           <label htmlFor="img">Image URL or path</label>
-          <input id="img" value={f.img} onChange={(e) => set("img", e.target.value)} placeholder="https://… or assets/img/post-landscape-1.jpg" {...bad("img")} />
+          <input id="img" value={f.img} onChange={(e) => set("img", e.target.value)} placeholder="https://… or assets/img/courier.jpg" {...bad("img")} />
           {f.img.trim() && (
             <div className="preview">
               <Duo src={f.img.trim()} ratio="3 / 2" />
