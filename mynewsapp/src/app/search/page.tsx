@@ -7,8 +7,9 @@ import DemoNote from "../components/DemoNote";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Search · ForPeople News" };
 
-export default async function Search({ searchParams }: { searchParams: { q?: string } }) {
-  const q = (searchParams.q ?? "").trim();
+export default async function Search({ searchParams }: { searchParams: { q?: string | string[] } }) {
+  const raw = searchParams.q;
+  const q = ((Array.isArray(raw) ? raw[0] : raw) ?? "").trim();
   const { posts, demo } = await getPosts();
   const results = q ? posts.filter((p) => matches(p, q)) : [];
 

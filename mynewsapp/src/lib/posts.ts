@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import dbConnect from "../../config/db";
 import PostItem from "../../models/PostItem";
 import { SEED } from "./seed";
@@ -31,16 +32,18 @@ export async function getPosts(): Promise<{ posts: Post[]; demo: boolean }> {
   }
 }
 
-export async function getPost(id: string): Promise<{ post: Post | null; demo: boolean }> {
+/** `offline` means the post may exist but the database couldn't be reached. */
+export async function getPost(id: string): Promise<{ post: Post | null; demo: boolean; offline: boolean }> {
   if (id.startsWith("demo-")) {
-    return { post: SEED.find((p) => p._id === id) ?? null, demo: true };
+    return { post: SEED.find((p) => p._id === id) ?? null, demo: true, offline: false };
   }
+  if (!mongoose.isValidObjectId(id)) return { post: null, demo: false, offline: false };
   try {
     await dbConnect();
     const doc = await PostItem.findById(id).lean();
-    return { post: doc ? serialize(doc) : null, demo: false };
+    return { post: doc ? serialize(doc) : null, demo: false, offline: false };
   } catch {
-    return { post: null, demo: false };
+    return { post: null, demo: false, offline: true };
   }
 }
 

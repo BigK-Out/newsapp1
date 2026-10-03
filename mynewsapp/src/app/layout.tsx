@@ -8,6 +8,9 @@ const display = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-disp
 const serif = Newsreader({ subsets: ["latin"], variable: "--font-serif", style: ["normal", "italic"] });
 const mono = DM_Mono({ subsets: ["latin"], variable: "--font-mono", weight: ["400", "500"] });
 
+// The masthead shows today's date, so every page renders per request.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "ForPeople News",
   description: "Independent local news, read by the people it affects.",

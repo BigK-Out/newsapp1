@@ -10,16 +10,21 @@ import DeleteButton from "../../components/DeleteButton";
 import StoryCard from "../../components/StoryCard";
 import DemoNote from "../../components/DemoNote";
 import Icon from "../../components/Icon";
+import Offline from "../../components/Offline";
+import { isEditor } from "@/lib/auth";
+import { logout } from "../../login/actions";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const { post } = await getPost(params.id);
+  const { post, offline } = await getPost(params.id);
+  if (offline) return { title: "Offline · ForPeople News" };
   return post ? { title: `${post.title} · ForPeople News`, description: post.brief } : { title: "Story not found" };
 }
 
 export default async function Story({ params }: { params: { id: string } }) {
-  const { post, demo } = await getPost(params.id);
+  const { post, demo, offline } = await getPost(params.id);
+  if (offline) return <Offline />;
   if (!post) notFound();
 
   const { posts } = await getPosts();
@@ -71,12 +76,15 @@ export default async function Story({ params }: { params: { id: string } }) {
             <CopyLink />
           </div>
 
-          {!demo && (
+          {!demo && isEditor() && (
             <details className="editor-tools">
               <summary>Editor tools</summary>
               <div className="actions">
                 <Link href={`/createpostitems/${post._id}`} className="btn btn-ghost"><Icon name="pen" /> Edit story</Link>
                 <DeleteButton id={post._id} />
+                <form action={logout}>
+                  <button type="submit" className="btn btn-ghost">Sign out</button>
+                </form>
               </div>
             </details>
           )}
