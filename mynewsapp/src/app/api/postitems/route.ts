@@ -1,27 +1,45 @@
+import mongoose from "mongoose";
 import dbConnect from "../../../../config/db";
 import PostItem from "../../../../models/PostItem";
+import pickFields, { missingRequired } from "../../../../models/pickFields";
+import { getPosts } from "../../../lib/posts";
+import { requireEditor } from "../../../lib/auth";
 
-dbConnect()
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-    const postItems = await PostItem.find().select("-__v")
-    return Response.json(postItems);
+    const { posts, demo } = await getPosts();
+    return Response.json(posts, { headers: demo ? { "x-demo-data": "1" } : {} });
 }
 
 export async function POST(request: Request) {
-    const postItem = await request.json()
+    const denied = requireEditor();
+    if (denied) return denied;
+
+    let body;
+    try {
+        body = await request.json();
+    } catch {
+        return Response.json({ message: "Invalid JSON" }, { status: 400 });
+    }
+    const data = pickFields(body ?? {});
+    if (missingRequired(data).length) {
+        return Response.json({ message: "Headline, image, category and summary are required." }, { status: 400 });
+    }
 
     try {
-        const savedItem = await new PostItem({...postItem}).save();
-        return new Response(JSON.stringify(savedItem),{
-            headers: {
-                "Content-Type" : "application/json"
-            },
-            status: 201
-
-        }) // "..." is called spread operator and its used to copy everything from the given parameter (in our case postitem) 
+        await dbConnect();
+        // Reuse the writer's photo from an earlier story so bylines stay consistent.
+        if (!data.avatar && typeof data.author === "string" && data.author.trim()) {
+            const previous = await PostItem.findOne({ author: data.author.trim(), avatar: { $nin: [null, ""] } }).select("avatar").lean<{ avatar: string }>();
+            if (previous) data.avatar = previous.avatar;
+        }
+        const savedItem = await new PostItem(data).save();
+        return Response.json(savedItem, { status: 201 });
     } catch (error) {
-        return new Response(JSON.stringify({message: "SERVER ERROR"}),
-        {status: 500});
+        if (error instanceof mongoose.Error.ValidationError || error instanceof mongoose.Error.CastError) {
+            return Response.json({ message: error.message }, { status: 400 });
+        }
+        return Response.json({ message: "Couldn't save. The database is unreachable." }, { status: 503 });
     }
 }

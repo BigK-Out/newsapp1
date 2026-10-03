@@ -1,153 +1,113 @@
-"use client"
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { getPost, getPosts } from "@/lib/posts";
+import { authorHref, categoryInk, imgSrc, longDate, paragraphs, readingMinutes } from "@/lib/format";
+import ProgressBar from "../../components/ProgressBar";
+import SaveButton from "../../components/SaveButton";
+import CopyLink from "../../components/CopyLink";
+import DeleteButton from "../../components/DeleteButton";
+import StoryCard from "../../components/StoryCard";
+import DemoNote from "../../components/DemoNote";
+import Icon from "../../components/Icon";
+import Offline from "../../components/Offline";
+import CategoryTag from "../../components/CategoryTag";
+import Avatar from "../../components/Avatar";
+import ListenButton from "../../components/ListenButton";
+import ShareButton from "../../components/ShareButton";
+import ViewTracker from "../../components/ViewTracker";
+import { isEditor } from "@/lib/auth";
+import { logout } from "../../login/actions";
 
+export const dynamic = "force-dynamic";
 
-import { initialPost, PostProps } from '@/app/sections/Posts';
-import React, {useState, useEffect} from 'react'
-import "./style.css"
-import Image from 'next/image';
-import PreLoader from '@/app/components/PreLoader';
-import SidePostItem from '@/app/components/SidePostItem';
-import Link from 'next/link';
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const { post, offline } = await getPost(params.id);
+  if (offline) return { title: "Offline · ForPeople News" };
+  return post ? { title: `${post.title} · ForPeople News`, description: post.brief } : { title: "Story not found" };
+}
 
-export default function PostItem({params}: {params: {id: string}}) {
-  const id: string = params.id;
+export default async function Story({ params }: { params: { id: string } }) {
+  const { post, demo, offline } = await getPost(params.id);
+  if (offline) return <Offline />;
+  if (!post) notFound();
 
-  const [item,setItem] = useState(initialPost);
-  const [items, setItems] = useState([])
+  const { posts } = await getPosts();
+  const others = posts.filter((p) => p._id !== post._id);
+  const sameCategory = others.filter((p) => p.category === post.category);
+  const related = [...sameCategory, ...others.filter((p) => p.category !== post.category)].slice(0, 3);
+  const opinion = post.kind === "opinion";
+  const minutes = readingMinutes(post);
 
-  const tabsData = [
-    {id: 1, name: "Popular", active: true},
-    {id: 2, name: "Trending", active: false}, 
-  ];
+  const paras = paragraphs(post);
+  const [lede, ...restParas] = paras;
 
-  const [tabs, setTabs] = useState(tabsData);
-
-  const handleTabActive =(id: number):void=>{
-    setTabs(tabsData.map(tab=>{
-      tab.active=false;
-      if(tab.id === id) tab.active = true
-      return tab
-    }))
-    
-  }
-  const getSinglePostData = () => {
-    fetch(`/api/postitems/${id}`)
-    .then(res=>res.json())
-    .then(data=>setItem(data))
-    .catch(e=>console.log(e.messages))
-  };
-
-  const getItemsData = () =>{
-    fetch(`/api/postitems`)
-    .then(res=> res.json())
-    .then(data=>setItems(data))
-    .catch(e=> console.log(e.message));
-  }
-
-  useEffect(() =>{
-    getSinglePostData();
-    getItemsData();
-  }, [])
   return (
-    <main id='main'>
-      <section className="single-post-content">
-        <div className="container">
-          <div className="row">
-            <div className="col-md-9 post-content">
-              {item && item.category !== "" ? (
-                <div className="single-post">
-                  <div className="post-meta">
-                    <span className="date">{item.category}</span> 
-                    <span className='mx-1'>
-                      <i className='bi bi-dot'></i>
-                    </span>
-                    <span>{new Date(item.date).toLocaleDateString("tr-TR")}</span>
-                  </div>
-                  <h1 className='mb-5'>{item.title}</h1>
-                  <p>
-                    <span className="firstcharacter">
-                      {item.brief && item.brief.charAt(0)}
-                    </span>
-                    {item.brief && item.brief.substring(1)} {/* substring will give you the values between the second (1) and the last string */}
-                  </p>
-
-                  <p>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-                    incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                    exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                    in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
-                    sint occaecat cupidatat non proident, 
-                    sunt in culpa qui officia deserunt mollit anim id est laborum.
-                  </p>
-                  <figure className='my-4'>
-                      {/* <Image src={`/${item.img}`} alt='' className='img-fluid' width={100} height={100} layout='responsive' /> */}
-                      <img src={`/${item.img}`} alt="" className='img-fluid' />
-                    <figcaption>
-                    Lorem ipsum dolor sit amet, elit dolor sit amet? elit dolor sit amet?
-                    </figcaption>
-                  </figure>
-                  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-                  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-                  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-                  <div className="d-flex justify-content-center gap-4">
-                    <a className='btn btn-primary'>
-                      <i className='bi bi-trash'></i>
-                    </a>
-                    <Link href={`/createpostitem/${id}`} className='btn btn-primary'>
-                    <i className='bi bi-pen'></i>
-                    </Link>
-                  </div>
-                </div>
-              ) : (
-                <PreLoader />
+    <>
+      <ProgressBar />
+      {!demo && <ViewTracker id={post._id} />}
+      <main className={`wrap article-wrap ink-${categoryInk(post.category)}`}>
+        <DemoNote demo={demo} />
+        <article className={`article${opinion ? " article-opinion" : ""}`}>
+          <header>
+            <p className="kicker">
+              <CategoryTag post={post} />
+              <time dateTime={post.date}>{longDate(post.date)}</time>
+            </p>
+            <h1>{post.title}</h1>
+            <p className="byline byline-lg">
+              {post.author && (
+                <Link href={authorHref(post.author)} className="author">
+                  {(post.avatar || opinion) && <Avatar name={post.author} src={post.avatar} size={opinion ? 48 : 36} />}
+                  {opinion ? <span>Opinion by <strong>{post.author}</strong></span> : post.author}
+                </Link>
               )}
-            </div>
-            <div className="col-md-3">
-              <div className="aside-block">
-                <ul className='nav nav-pills custom-tab-nav mb-4'>
-                {
-                  tabs.map(tab=>(
-                    <li className="nav-item" key={tab.id}>
-                      <button className={`nav-link ${
-                        tab.active ? 'active': undefined
-                      }`}
-                      onClick={()=>handleTabActive(tab.id)}>
-                        {tab.name}
-                      </button>
-                    </li>
-                  ))
-                }
-                </ul>
-                <div className="tab-content">
-                  <div className={`tab-pane fade ${tabs[0].active ? "show active": ''}`}>
-                    {
-                      items.slice(0,6).map((item: PostProps) =>(
-                        <SidePostItem key={item._id} item={item} />
-                      ))
-                    }
-                  </div>
-                  <div className={`tab-pane fade ${tabs[1].active ? "show active": ''}`}>
-                    {
-                      items.slice(6,12).map((item: PostProps) =>(
-                        <SidePostItem key={item._id} item={item} />
-                      ))
-                    }
-                  </div>
-                </div>
-              </div>
-              <div className="aside-block">
-                <h3 className="aside-title">Video</h3>
-                <div className="video-post">
-                  <a target="_blank" href="https://www.youtube.com/watch?v=xvFZjo5PgG0" className="link-video">
-                    <span className="bi-play-fill"></span>
-                    <img src="/assets/img/post-landscape-3.jpg" alt="" className="img-fluid" />
-                  </a>
-                </div>
-              </div>
-            </div>
+              <span>{minutes} min read</span>
+            </p>
+          </header>
+
+          <figure className="article-figure">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={imgSrc(post.img)} alt="" />
+            {post.caption && <figcaption>{post.caption}</figcaption>}
+          </figure>
+
+          <div className="article-tools">
+            <ListenButton text={[post.title, ...paras].join(". ")} minutes={minutes} />
           </div>
-        </div>
-      </section>
-    </main>
-  )
+
+          <div className="prose">
+            {lede && <p className="lede">{lede}</p>}
+            {restParas.map((p, i) => <p key={i}>{p}</p>)}
+          </div>
+
+          <div className="article-actions">
+            <SaveButton id={post._id} variant="full" />
+            <ShareButton title={post.title} />
+            <CopyLink />
+          </div>
+
+          {!demo && isEditor() && (
+            <details className="editor-tools">
+              <summary>Editor tools</summary>
+              <div className="actions">
+                <Link href={`/createpostitems/${post._id}`} className="btn btn-ghost"><Icon name="pen" /> Edit story</Link>
+                <DeleteButton id={post._id} />
+                <form action={logout}>
+                  <button type="submit" className="btn btn-ghost">Sign out</button>
+                </form>
+              </div>
+            </details>
+          )}
+        </article>
+
+        <section className="keep-reading" aria-labelledby="kr">
+          <h2 id="kr" className="sec-label"><span>Keep reading</span></h2>
+          <div className="grid">
+            {related.map((p) => <StoryCard key={p._id} post={p} />)}
+          </div>
+        </section>
+      </main>
+    </>
+  );
 }
