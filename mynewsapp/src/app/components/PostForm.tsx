@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import type { Post } from "@/lib/types";
 import Duo from "./Duo";
 
-type Fields = Pick<Post, "title" | "category" | "img" | "author" | "brief" | "body" | "top" | "trending">;
+type Fields = Pick<Post, "title" | "kind" | "category" | "img" | "caption" | "author" | "brief" | "body" | "top" | "trending" | "breaking">;
 
-const EMPTY: Fields = { title: "", category: "", img: "", author: "", brief: "", body: "", top: false, trending: false };
+const EMPTY: Fields = { title: "", kind: "news", category: "", img: "", caption: "", author: "", brief: "", body: "", top: false, trending: false, breaking: false };
 const SUGGESTED_CATEGORIES = ["City", "Transit", "Money", "Culture", "Health", "Sport"];
 
 export default function PostForm({ post }: { post?: Post }) {
@@ -15,7 +15,19 @@ export default function PostForm({ post }: { post?: Post }) {
   const editing = !!post;
   const [f, setF] = useState<Fields>(
     post
-      ? { title: post.title, category: post.category, img: post.img, author: post.author, brief: post.brief, body: post.body, top: post.top, trending: post.trending }
+      ? {
+          title: post.title,
+          kind: post.kind,
+          category: post.category,
+          img: post.img,
+          caption: post.caption,
+          author: post.author,
+          brief: post.brief,
+          body: post.body,
+          top: post.top,
+          trending: post.trending,
+          breaking: post.breaking,
+        }
       : EMPTY
   );
   const [missing, setMissing] = useState<string[]>([]);
@@ -68,6 +80,14 @@ export default function PostForm({ post }: { post?: Post }) {
         </div>
 
         <div className="field">
+          <label htmlFor="kind">Type</label>
+          <select id="kind" value={f.kind} onChange={(e) => set("kind", e.target.value as Fields["kind"])}>
+            <option value="news">News</option>
+            <option value="opinion">Opinion column</option>
+          </select>
+        </div>
+
+        <div className="field">
           <label htmlFor="category">Category</label>
           <input id="category" list="cats" value={f.category} onChange={(e) => set("category", e.target.value)} {...bad("category")} />
           <datalist id="cats">
@@ -92,6 +112,11 @@ export default function PostForm({ post }: { post?: Post }) {
         </div>
 
         <div className="field wide">
+          <label htmlFor="caption">Photo caption <small>Optional</small></label>
+          <input id="caption" value={f.caption} onChange={(e) => set("caption", e.target.value)} placeholder="What the picture shows" />
+        </div>
+
+        <div className="field wide">
           <label htmlFor="brief">Summary <small>{f.brief.length}/220</small></label>
           <textarea id="brief" rows={3} maxLength={220} value={f.brief} onChange={(e) => set("brief", e.target.value)} {...bad("brief")} />
         </div>
@@ -103,8 +128,9 @@ export default function PostForm({ post }: { post?: Post }) {
 
         <fieldset className="field wide checks">
           <legend>Placement</legend>
-          <label><input type="checkbox" checked={f.top} onChange={(e) => set("top", e.target.checked)} /> Lead story on the front page</label>
-          <label><input type="checkbox" checked={f.trending} onChange={(e) => set("trending", e.target.checked)} /> Include in Most read</label>
+          <label><input type="checkbox" checked={f.top} onChange={(e) => set("top", e.target.checked)} /> Pin to the front-page carousel</label>
+          <label><input type="checkbox" checked={f.trending} onChange={(e) => set("trending", e.target.checked)} /> Boost in Most read until it has real readers</label>
+          <label><input type="checkbox" checked={f.breaking} onChange={(e) => set("breaking", e.target.checked)} /> Breaking news banner on every page (shows for 24 hours)</label>
         </fieldset>
 
         {error && <p role="alert" className="form-error wide">{error}</p>}

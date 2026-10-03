@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Newsreader, DM_Mono } from "next/font/google";
-import Link from "next/link";
 import Masthead from "./components/Masthead";
+import Footer from "./components/Footer";
+import BreakingBanner from "./components/BreakingBanner";
+import { breakingStory, getPosts } from "@/lib/posts";
+import { categoriesOf } from "@/lib/format";
 import "./globals.css";
 
 const display = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-display", axes: ["wdth"] });
@@ -14,12 +17,16 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "ForPeople News",
   description: "Independent local news, read by the people it affects.",
+  alternates: { types: { "application/rss+xml": "/feed.xml" } },
 };
 
 // Runs before paint so the saved theme never flashes.
 const themeScript = `try{var t=localStorage.getItem("fp:theme");if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.dataset.theme=t}catch(e){}`;
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const { posts } = await getPosts();
+  const categories = categoriesOf(posts.filter((p) => p.kind !== "opinion")).map((c) => c.name);
+
   return (
     <html lang="en" className={`${display.variable} ${serif.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
@@ -28,18 +35,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <a href="#content" className="skip">Skip to content</a>
         <Masthead />
+        <BreakingBanner post={breakingStory(posts)} />
         <div id="content">{children}</div>
-        <footer className="footer">
-          <div className="wrap footer-inner">
-            <p className="wordmark small">For<span>People</span></p>
-            <nav aria-label="Footer">
-              <Link href="/postitems">Latest</Link>
-              <Link href="/saved">Saved</Link>
-              <Link href="/createpostitems">Write a story</Link>
-            </nav>
-            <p className="fine">Independent. Reader-first. Saved stories never leave your device.</p>
-          </div>
-        </footer>
+        <Footer categories={categories} />
       </body>
     </html>
   );

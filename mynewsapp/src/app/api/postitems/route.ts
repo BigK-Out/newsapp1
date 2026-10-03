@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import dbConnect from "../../../../config/db";
 import PostItem from "../../../../models/PostItem";
 import pickFields, { missingRequired } from "../../../../models/pickFields";
@@ -28,9 +29,17 @@ export async function POST(request: Request) {
 
     try {
         await dbConnect();
+        // Reuse the writer's photo from an earlier story so bylines stay consistent.
+        if (!data.avatar && typeof data.author === "string" && data.author.trim()) {
+            const previous = await PostItem.findOne({ author: data.author.trim(), avatar: { $nin: [null, ""] } }).select("avatar").lean<{ avatar: string }>();
+            if (previous) data.avatar = previous.avatar;
+        }
         const savedItem = await new PostItem(data).save();
         return Response.json(savedItem, { status: 201 });
-    } catch {
+    } catch (error) {
+        if (error instanceof mongoose.Error.ValidationError || error instanceof mongoose.Error.CastError) {
+            return Response.json({ message: error.message }, { status: 400 });
+        }
         return Response.json({ message: "Couldn't save. The database is unreachable." }, { status: 503 });
     }
 }

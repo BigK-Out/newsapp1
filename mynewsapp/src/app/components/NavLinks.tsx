@@ -7,6 +7,7 @@ import { useSaved } from "./saved";
 const LINKS = [
   { href: "/", label: "Front page" },
   { href: "/postitems", label: "Latest" },
+  { href: "/opinion", label: "Opinion" },
   { href: "/saved", label: "Saved" },
   { href: "/createpostitems", label: "Write" },
 ];

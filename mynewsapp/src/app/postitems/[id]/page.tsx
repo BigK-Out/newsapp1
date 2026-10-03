@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getPost, getPosts } from "@/lib/posts";
-import { categoryHref, imgSrc, longDate, paragraphs, readingMinutes } from "@/lib/format";
+import { authorHref, categoryInk, imgSrc, longDate, paragraphs, readingMinutes } from "@/lib/format";
 import ProgressBar from "../../components/ProgressBar";
 import SaveButton from "../../components/SaveButton";
 import CopyLink from "../../components/CopyLink";
@@ -11,6 +11,11 @@ import StoryCard from "../../components/StoryCard";
 import DemoNote from "../../components/DemoNote";
 import Icon from "../../components/Icon";
 import Offline from "../../components/Offline";
+import CategoryTag from "../../components/CategoryTag";
+import Avatar from "../../components/Avatar";
+import ListenButton from "../../components/ListenButton";
+import ShareButton from "../../components/ShareButton";
+import ViewTracker from "../../components/ViewTracker";
 import { isEditor } from "@/lib/auth";
 import { logout } from "../../login/actions";
 
@@ -31,6 +36,8 @@ export default async function Story({ params }: { params: { id: string } }) {
   const others = posts.filter((p) => p._id !== post._id);
   const sameCategory = others.filter((p) => p.category === post.category);
   const related = [...sameCategory, ...others.filter((p) => p.category !== post.category)].slice(0, 3);
+  const opinion = post.kind === "opinion";
+  const minutes = readingMinutes(post);
 
   const paras = paragraphs(post);
   const [lede, ...restParas] = paras;
@@ -38,33 +45,36 @@ export default async function Story({ params }: { params: { id: string } }) {
   return (
     <>
       <ProgressBar />
-      <main className="wrap article-wrap">
+      {!demo && <ViewTracker id={post._id} />}
+      <main className={`wrap article-wrap ink-${categoryInk(post.category)}`}>
         <DemoNote demo={demo} />
-        <article className="article">
+        <article className={`article${opinion ? " article-opinion" : ""}`}>
           <header>
             <p className="kicker">
-              <Link href={categoryHref(post.category)}>{post.category}</Link>
+              <CategoryTag post={post} />
               <time dateTime={post.date}>{longDate(post.date)}</time>
             </p>
             <h1>{post.title}</h1>
             <p className="byline byline-lg">
               {post.author && (
-                <span className="author">
-                  {post.avatar && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={imgSrc(post.avatar)} alt="" width={36} height={36} />
-                  )}
-                  {post.author}
-                </span>
+                <Link href={authorHref(post.author)} className="author">
+                  {(post.avatar || opinion) && <Avatar name={post.author} src={post.avatar} size={opinion ? 48 : 36} />}
+                  {opinion ? <span>Opinion by <strong>{post.author}</strong></span> : post.author}
+                </Link>
               )}
-              <span>{readingMinutes(post)} min read</span>
+              <span>{minutes} min read</span>
             </p>
           </header>
 
           <figure className="article-figure">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={imgSrc(post.img)} alt="" />
+            {post.caption && <figcaption>{post.caption}</figcaption>}
           </figure>
+
+          <div className="article-tools">
+            <ListenButton text={[post.title, ...paras].join(". ")} minutes={minutes} />
+          </div>
 
           <div className="prose">
             {lede && <p className="lede">{lede}</p>}
@@ -73,6 +83,7 @@ export default async function Story({ params }: { params: { id: string } }) {
 
           <div className="article-actions">
             <SaveButton id={post._id} variant="full" />
+            <ShareButton title={post.title} />
             <CopyLink />
           </div>
 

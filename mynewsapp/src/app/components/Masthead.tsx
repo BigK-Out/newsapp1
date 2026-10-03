@@ -2,16 +2,13 @@ import Link from "next/link";
 import NavLinks from "./NavLinks";
 import ThemeToggle from "./ThemeToggle";
 import Icon from "./Icon";
-import { longDate } from "@/lib/format";
+import UtilityBar from "./UtilityBar";
 
 export default function Masthead() {
   return (
     <header className="masthead">
       <div className="wrap">
-        <div className="masthead-top">
-          <time dateTime={new Date().toISOString()}>{longDate(new Date().toISOString())}</time>
-          <span>Independent local news</span>
-        </div>
+        <UtilityBar />
         <div className="masthead-brand">
           <Link href="/" className="wordmark" aria-label="ForPeople News, front page">
             For<span>People</span>

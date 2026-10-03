@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getPosts } from "@/lib/posts";
-import { categoriesOf, categoryHref } from "@/lib/format";
+import { categoriesOf, categoryHref, categoryInk } from "@/lib/format";
 import StoryCard from "../components/StoryCard";
 import DemoNote from "../components/DemoNote";
 
@@ -16,7 +16,7 @@ export default async function Latest() {
       <h1 className="page-title">Latest</h1>
       <nav className="chips" aria-label="Browse by category">
         {categoriesOf(posts).map((c) => (
-          <Link key={c.name} href={categoryHref(c.name)}>{c.name} <span>{c.count}</span></Link>
+          <Link key={c.name} href={categoryHref(c.name)} className={`ink-${categoryInk(c.name)}`}>{c.name} <span>{c.count}</span></Link>
         ))}
       </nav>
       {posts.length === 0 ? (

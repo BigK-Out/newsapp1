@@ -39,3 +39,42 @@ export function categoriesOf(posts: Post[]) {
   for (const p of posts) counts.set(p.category, (counts.get(p.category) ?? 0) + 1);
   return Array.from(counts.entries()).sort((a, b) => b[1] - a[1]).map(([name, count]) => ({ name, count }));
 }
+
+// Real riso drum colours. Each category prints in its own ink: on labels, section rules and duotone photos.
+const INKS = ["blue", "pink", "teal", "orange", "green", "sun"] as const;
+export type Ink = (typeof INKS)[number];
+const CATEGORY_INKS: Record<string, Ink> = {
+  city: "blue",
+  transit: "teal",
+  money: "green",
+  culture: "pink",
+  health: "orange",
+  sport: "sun",
+};
+
+export function categoryInk(category: string): Ink {
+  const key = category.trim().toLowerCase();
+  if (CATEGORY_INKS[key]) return CATEGORY_INKS[key];
+  let h = 0;
+  for (const ch of key) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return INKS[h % INKS.length];
+}
+
+export const slugify = (s: string) =>
+  s
+    .normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+export const authorHref = (author: string) => `/author/${slugify(author)}`;
+
+export function initials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]!.toUpperCase())
+    .join("");
+}

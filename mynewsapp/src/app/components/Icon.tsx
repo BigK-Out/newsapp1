@@ -8,6 +8,10 @@ const PATHS: Record<string, React.ReactNode> = {
   trash: <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" />,
   arrow: <path d="M4 12h16m-6-6 6 6-6 6" />,
   plus: <path d="M12 5v14M5 12h14" />,
+  play: <path d="M7 4.5v15l12-7.5z" />,
+  stop: <rect x="6" y="6" width="12" height="12" />,
+  share: <><path d="M12 15V3.5M7.5 8 12 3.5 16.5 8" /><path d="M5 12v8h14v-8" /></>,
+  rss: <><path d="M5 11a8 8 0 0 1 8 8M5 5a14 14 0 0 1 14 14" /><circle cx="6" cy="18" r="1.5" /></>,
 };
 
 export default function Icon({ name, filled = false, size = 18 }: { name: keyof typeof PATHS; filled?: boolean; size?: number }) {
